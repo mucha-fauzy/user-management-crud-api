@@ -47,3 +47,7 @@ This section describe on how to contribute to this project, for example :
 * pull request procedure
 * create issue procedure
 * etc
+
+## How to Migrations
+
+`go run ./migrations/domain/users/users_table.go`
