@@ -26,11 +26,6 @@ func main() {
 	// Wire everything up
 	http := InitializeService()
 
-	consumers := InitializeEvent()
-
-	// Start consumers
-	consumers.Start()
-
 	// Run server
 	http.SetupAndServe()
 }

@@ -1,14 +1,13 @@
-//+build wireinject
+//go:build wireinject
+// +build wireinject
 
 package main
 
 import (
 	"github.com/evermos/boilerplate-go/configs"
-	"github.com/evermos/boilerplate-go/event"
-	fooBarBazEvent "github.com/evermos/boilerplate-go/event/domain/foobarbaz"
-	"github.com/evermos/boilerplate-go/event/producer"
 	"github.com/evermos/boilerplate-go/infras"
-	"github.com/evermos/boilerplate-go/internal/domain/foobarbaz"
+	"github.com/evermos/boilerplate-go/internal/domain/auth"
+	"github.com/evermos/boilerplate-go/internal/domain/users"
 	"github.com/evermos/boilerplate-go/internal/handlers"
 	"github.com/evermos/boilerplate-go/transport/http"
 	"github.com/evermos/boilerplate-go/transport/http/middleware"
@@ -26,22 +25,29 @@ var persistences = wire.NewSet(
 	infras.ProvideMySQLConn,
 )
 
-// Wiring for domain FooBarBaz.
-var domainFooBarBaz = wire.NewSet(
-	// FooService interface and implementation
-	foobarbaz.ProvideFooServiceImpl,
-	wire.Bind(new(foobarbaz.FooService), new(*foobarbaz.FooServiceImpl)),
-	// FooRepository interface and implementation
-	foobarbaz.ProvideFooRepositoryMySQL,
-	wire.Bind(new(foobarbaz.FooRepository), new(*foobarbaz.FooRepositoryMySQL)),
-	// Producer interface and implementation
-	producer.NewSNSProducer,
-	wire.Bind(new(producer.Producer), new(*producer.SNSProducer)),
+// Wiring for domain.
+var domainAuth = wire.NewSet(
+	// AuthService interface and implementation
+	auth.ProvideAuthServiceImpl,
+	wire.Bind(new(auth.AuthService), new(*auth.AuthServiceImpl)),
+	// AuthRepository interface and implementation
+	auth.ProvideAuthRepositoryMySQL,
+	wire.Bind(new(auth.AuthRepository), new(*auth.AuthRepositoryMySQL)),
+)
+
+var domainUser = wire.NewSet(
+	// UserService interface and implementation
+	users.ProvideUserServiceImpl,
+	wire.Bind(new(users.UserService), new(*users.UserServiceImpl)),
+	// UserRepository interface and implementation
+	users.ProvideUserRepositoryMySQL,
+	wire.Bind(new(users.UserRepository), new(*users.UserRepositoryMySQL)),
 )
 
 // Wiring for all domains.
 var domains = wire.NewSet(
-	domainFooBarBaz,
+	domainAuth,
+	domainUser,
 )
 
 var authMiddleware = wire.NewSet(
@@ -50,15 +56,10 @@ var authMiddleware = wire.NewSet(
 
 // Wiring for HTTP routing.
 var routing = wire.NewSet(
-	wire.Struct(new(router.DomainHandlers), "FooBarBazHandler"),
-	handlers.ProvideFooBarBazHandler,
+	wire.Struct(new(router.DomainHandlers), "AuthHandler", "UserHandler"),
+	handlers.ProvideAuthHandler,
+	handlers.ProvideUserHandler,
 	router.ProvideRouter,
-)
-
-// Wiring for all domains event consumer.
-var evco = wire.NewSet(
-	wire.Struct(new(event.Consumers), "FooBarBaz"),
-	fooBarBazEvent.ProvideConsumerImpl,
 )
 
 // Wiring for everything.
@@ -77,19 +78,4 @@ func InitializeService() *http.HTTP {
 		// selected transport layer
 		http.ProvideHTTP)
 	return &http.HTTP{}
-}
-
-// Wiring the event needs.
-func InitializeEvent() event.Consumers {
-	wire.Build(
-		// configurations
-		configurations,
-		// persistences
-		persistences,
-		// domains
-		domains,
-		// event consumer
-		evco)
-
-	return event.Consumers{}
 }

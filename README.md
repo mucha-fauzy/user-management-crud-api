@@ -48,6 +48,8 @@ This section describe on how to contribute to this project, for example :
 * create issue procedure
 * etc
 
-## How to Migrations
-
+## How to Migrate
 `go run ./migrations/domain/users/users_table.go`
+
+## How to Seed
+`go run ./seeders/domain/auth/auth_seed.go`
