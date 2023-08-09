@@ -26,3 +26,6 @@ wire_gen.go
 # *mock.go
 **/mock*
 .cover
+
+# Ignore build
+boilerplate-go
