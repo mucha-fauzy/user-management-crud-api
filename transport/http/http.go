@@ -20,6 +20,7 @@ import (
 	"github.com/go-chi/cors"
 	"github.com/rs/zerolog/log"
 	httpSwagger "github.com/swaggo/http-swagger"
+	// "github.com/swaggo/swag/example/basic/docs"
 )
 
 // ServerState is an indicator if this server's state.
