@@ -72,5 +72,15 @@ type ProfileView struct {
 	DepartmentName *string `db:"department_name"`
 }
 
-// type UpdateName struct {
-// }
+type UpdateProfile struct {
+	Name        *string   `db:"name" json:"name"`
+	Gender      *string   `db:"gender" json:"gender"`
+	DoB         *string   `db:"dob" json:"dob"`
+	Education   *string   `db:"education" json:"education"`
+	Address     *string   `db:"address" json:"address"`
+	City        *string   `db:"city" json:"city"`
+	Province    *string   `db:"province" json:"province"`
+	PhoneNumber *string   `db:"phone_number" json:"phone_number"`
+	UpdatedAt   time.Time `db:"updated_at" json:"updated_at"`
+	UpdatedBy   string    `db:"updated_by" json:"updated_by"`
+}
