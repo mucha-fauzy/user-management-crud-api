@@ -20,6 +20,8 @@ type Access struct {
 
 type User struct {
 	ID        string    `db:"id" json:"id"`
+	ProfileID string    `db:"profile_id"`
+	StatusID  string    `db:"status_id"`
 	Username  string    `db:"username" json:"username"`
 	Password  string    `db:"password" json:"password"`
 	Role      string    `db:"role" json:"role"`
