@@ -39,7 +39,7 @@ func main() {
 		CREATE TABLE IF NOT EXISTS ums_profiles (
 			id VARCHAR(36) PRIMARY KEY,
 			name VARCHAR(255),
-			gender VARCHAR(10),
+			gender ENUM('male', 'female'),
 			dob VARCHAR(10),
 			education VARCHAR(50),
 			address VARCHAR(255),
@@ -93,21 +93,6 @@ func main() {
 		CREATE INDEX idx_profiles_name ON ums_profiles (name);
 		CREATE INDEX idx_status_role ON ums_status (job_role);
 		CREATE INDEX idx_status ON ums_status (status);
-		
-		-- Create triggers
-		CREATE TRIGGER update_users_on_status_update
-			AFTER UPDATE ON ums_status
-			FOR EACH ROW
-				UPDATE ums_users
-				SET updated_at = NOW(), updated_by = NEW.updated_by
-				WHERE status_id = NEW.id;
-		
-		CREATE TRIGGER update_users_on_profiles_update
-			AFTER UPDATE ON ums_profiles
-			FOR EACH ROW
-				UPDATE ums_users
-				SET updated_at = NOW(), updated_by = NEW.updated_by
-				WHERE profile_id = NEW.id;
 	`
 
 	// Split the query into separate statements
