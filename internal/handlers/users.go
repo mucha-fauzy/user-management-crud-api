@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/evermos/boilerplate-go/internal/domain/users"
 	"github.com/evermos/boilerplate-go/transport/http/middleware"
@@ -27,9 +29,11 @@ func (h *UserHandler) Router(r chi.Router) {
 	r.Route("/", func(r chi.Router) {
 		r.Use(h.Authentication.VerifyJWT)
 		r.Get("/profiles", h.GetProfile)
+		r.Patch("/profiles", h.UpdateProfile)
 		r.Group(func(r chi.Router) {
 			r.Use(h.Authentication.IsAdmin)
 			r.Get("/users", h.ReadUser)
+			r.Delete("/users/{uuid}", h.DeleteUserByID)
 		})
 	})
 }
@@ -73,6 +77,29 @@ func (h *UserHandler) ReadUser(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
+func (h *UserHandler) DeleteUserByID(w http.ResponseWriter, r *http.Request) {
+	// Get the user ID from the URL parameters
+	uuid := chi.URLParam(r, "uuid")
+
+	// Delete the user by ID
+	err := h.UserService.DeleteUserByID(uuid)
+	if err != nil {
+		if strings.Contains(err.Error(), "admin role") {
+			http.Error(w, "Cannot delete user with admin role or user not found", http.StatusForbidden)
+			return
+		}
+		http.Error(w, "Failed to delete user", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	response := map[string]interface{}{
+		"message": "User deleted successfully",
+	}
+	json.NewEncoder(w).Encode(response)
+}
+
 func (h *UserHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
 	uuid := r.Context().Value("user_id").(string)
 	profile, err := h.UserService.GetProfile(uuid)
@@ -83,4 +110,42 @@ func (h *UserHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(profile)
+}
+
+func (h *UserHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
+	// Decode the request body into the update struct
+	var update users.UpdateProfile
+	if err := json.NewDecoder(r.Body).Decode(&update); err != nil {
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+
+	update.UpdatedBy = r.Context().Value("username").(string)
+	uuid := r.Context().Value("user_id").(string)
+
+	// Validate and format the date of birth
+	if update.DoB != nil && *update.DoB != "" {
+		_, err := time.Parse("2006-01-02", *update.DoB)
+		if err != nil {
+			http.Error(w, "dob must be in YYYY-MM-DD format", http.StatusBadRequest)
+			return
+		}
+	} else if update.DoB != nil && *update.DoB == "" {
+		http.Error(w, "dob cannot be an empty string", http.StatusBadRequest)
+		return
+	}
+
+	// Perform the update operation
+	_, err := h.UserService.UpdateProfile(uuid, &update)
+	if err != nil {
+		http.Error(w, "Failed to update profile", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	response := map[string]interface{}{
+		"message": "Profile updated successfully",
+	}
+	json.NewEncoder(w).Encode(response)
 }
