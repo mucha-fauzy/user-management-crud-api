@@ -68,8 +68,8 @@ func main() {
 
 		CREATE TABLE IF NOT EXISTS ums_users (
 			id VARCHAR(36) PRIMARY KEY,
-			profile_id VARCHAR(36) UNIQUE,
-			status_id VARCHAR(36) UNIQUE,
+			profile_id VARCHAR(36) UNIQUE NOT NULL,
+			status_id VARCHAR(36) UNIQUE NOT NULL,
 			dept_id VARCHAR(50),
 			placement_id VARCHAR(50),
 			username VARCHAR(255) UNIQUE NOT NULL,
