@@ -57,12 +57,18 @@ func (r *AuthRepositoryMySQL) IsExist(username string) (bool, error) {
 }
 
 func (r *AuthRepositoryMySQL) Register(user *User) error {
-	query :=
-		`
-	INSERT INTO ums_users (id, username, password, role, created_at, created_by, updated_at, updated_by) 
-	VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-	`
+	// Because ums_profiles and ums_status id must be exist before user_id we can use transaction. By using a transaction, you can ensure that the data is either fully inserted or none at all. If any step fails, the transaction will be rolled back, and no data will be inserted. If all steps succeed, the transaction will be committed.
+	// Create a transaction
+	tx, err := r.DB.Write.Begin()
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to start transaction")
+		return err
+	}
+	defer tx.Rollback()
+
 	user.ID = uuid.New().String()
+	user.ProfileID = uuid.New().String()
+	user.StatusID = uuid.New().String()
 	// Hash the user's password using bcrypt
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
@@ -73,9 +79,48 @@ func (r *AuthRepositoryMySQL) Register(user *User) error {
 	user.Role = strings.ToLower(user.Role)
 	user.CreatedAt = time.Now()
 	user.UpdatedAt = time.Now()
-	_, err = r.DB.Write.Exec(
-		query,
+
+	// Insert data into ums_profiles
+	profileQuery := "INSERT INTO ums_profiles (id, created_at, created_by, updated_at, updated_by) VALUES (?,?,?,?,?)"
+	_, err = tx.Exec(
+		profileQuery,
+		user.ProfileID,
+		user.CreatedAt,
+		user.CreatedBy,
+		user.UpdatedAt,
+		user.UpdatedBy,
+	)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to insert profile into db")
+		return err
+	}
+
+	// Insert data into ums_status
+	statusQuery := "INSERT INTO ums_status (id, created_at, created_by, updated_at, updated_by) VALUES (?,?,?,?,?)"
+	_, err = tx.Exec(
+		statusQuery,
+		user.StatusID,
+		user.CreatedAt,
+		user.CreatedBy,
+		user.UpdatedAt,
+		user.UpdatedBy,
+	)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to insert status into db")
+		return err
+	}
+
+	userQuery :=
+		`
+	INSERT INTO ums_users (id, profile_id, status_id, username, password, role, created_at, created_by, updated_at, updated_by) 
+	VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	`
+
+	_, err = tx.Exec(
+		userQuery,
 		user.ID,
+		user.ProfileID,
+		user.StatusID,
 		user.Username,
 		user.Password,
 		user.Role,
@@ -86,6 +131,13 @@ func (r *AuthRepositoryMySQL) Register(user *User) error {
 	)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to insert user into db")
+		return err
+	}
+
+	// Commit the transaction
+	err = tx.Commit()
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to commit transaction")
 		return err
 	}
 
