@@ -46,6 +46,13 @@ func main() {
 
 	mysqlConn := infras.ProvideMySQLConn(config)
 
+	tx, err := mysqlConn.Write.Begin()
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to start transaction")
+		return
+	}
+	defer tx.Rollback()
+
 	id := uuid.New().String()
 	profileID := uuid.New().String()
 	statusID := uuid.New().String()
@@ -90,9 +97,9 @@ func main() {
 		UpdatedBy: username,
 	}
 
-	// Insert profile_id into ums_profiles
+	// Insert profile_id into ums_profiles using transaction
 	profileQuery := "INSERT INTO ums_profiles (id, created_at, created_by, updated_at, updated_by) VALUES (?,?,?,?,?)"
-	_, err = mysqlConn.Write.Exec(
+	_, err = tx.Exec(
 		profileQuery,
 		profile.ProfileID,
 		profile.CreatedAt,
@@ -105,9 +112,9 @@ func main() {
 		return
 	}
 
-	// Insert status_id into ums_status
+	// Insert status_id into ums_status using transaction
 	statusQuery := "INSERT INTO ums_status (id, created_at, created_by, updated_at, updated_by) VALUES (?,?,?,?,?)"
-	_, err = mysqlConn.Write.Exec(
+	_, err = tx.Exec(
 		statusQuery,
 		status.StatusID,
 		status.CreatedAt,
@@ -120,9 +127,9 @@ func main() {
 		return
 	}
 
-	// Insert the user data into ums_users
+	// Insert the user data into ums_users using transaction
 	userQuery := "INSERT INTO ums_users (id, profile_id, status_id, username, password, role, created_at, created_by, updated_at, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-	_, err = mysqlConn.Write.Exec(
+	_, err = tx.Exec(
 		userQuery,
 		user.ID,
 		user.ProfileID,
@@ -137,6 +144,13 @@ func main() {
 	)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to insert user data")
+		return
+	}
+
+	// Commit the transaction
+	err = tx.Commit()
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to commit transaction")
 		return
 	}
 }
