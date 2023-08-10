@@ -4,7 +4,9 @@ import "math"
 
 type UserService interface {
 	ReadUser(filter UserFilter, page, size int) (UserList, error)
-	GetProfile(uid string) (*ProfileView, error)
+	GetProfile(uuid string) (*ProfileView, error)
+	UpdateProfile(uuid string, profile *UpdateProfile) (*UpdateProfile, error)
+	DeleteUserByID(uuid string) error
 }
 
 type UserServiceImpl struct {
@@ -15,10 +17,6 @@ func ProvideUserServiceImpl(userRepository UserRepository) *UserServiceImpl {
 	return &UserServiceImpl{
 		UserRepository: userRepository,
 	}
-}
-
-func (s *UserServiceImpl) GetProfile(uid string) (*ProfileView, error) {
-	return s.UserRepository.GetProfile(uid)
 }
 
 func (s *UserServiceImpl) ReadUser(filter UserFilter, page, size int) (UserList, error) {
@@ -58,4 +56,16 @@ func (s *UserServiceImpl) ReadUser(filter UserFilter, page, size int) (UserList,
 	}
 
 	return response, nil
+}
+
+func (s *UserServiceImpl) GetProfile(uuid string) (*ProfileView, error) {
+	return s.UserRepository.GetProfile(uuid)
+}
+
+func (s *UserServiceImpl) UpdateProfile(uuid string, profile *UpdateProfile) (*UpdateProfile, error) {
+	return s.UserRepository.UpdateProfile(uuid, profile)
+}
+
+func (s *UserServiceImpl) DeleteUserByID(uuid string) error {
+	return s.UserRepository.DeleteUserByID(uuid)
 }
