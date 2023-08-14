@@ -23,8 +23,8 @@ This is an API for managing user profiles and authentication, built using Golang
 1. Clone the repository and navigate to the root folder:
 
 ```
-git clone https://github.com/yourusername/ums-api.git
-cd ums-api
+git clone https://github.com/mucha-fauzy/users-management-crud-api.git
+cd users-management-crud-api
 ```
 
 2. Install the required dependencies.
