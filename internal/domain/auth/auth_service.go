@@ -38,14 +38,12 @@ func (s *AuthServiceImpl) Register(user *User) error {
 }
 
 func (s *AuthServiceImpl) UserCheck(username, password string) (*Access, error) {
-	// Fetch the user by username from the repository
 	user, err := s.AuthRepository.GetUserByUsername(username)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to get user by username")
 		return nil, ErrNotFound
 	}
 
-	// Check if the user exists and the password is correct
 	if user == nil || bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)) != nil {
 		log.Error().Err(err).Msg("User is not exist or password incorrect")
 		return nil, ErrUnauthorized
@@ -62,7 +60,6 @@ func (s *AuthServiceImpl) Login(username, password string) (string, error) {
 		return "", err
 	}
 
-	// Generate JWT token
 	token, err := GenerateJWT(user)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to generate jwt")
@@ -73,7 +70,6 @@ func (s *AuthServiceImpl) Login(username, password string) (string, error) {
 }
 
 func GenerateJWT(access *Access) (string, error) {
-	// Create the claims for the JWT token
 	claims := jwt.MapClaims{
 		"user_id":  access.ID,
 		"username": access.Username,
@@ -81,7 +77,6 @@ func GenerateJWT(access *Access) (string, error) {
 		"exp":      time.Now().Add(time.Hour * 1).Unix(),
 	}
 
-	// Create the token with the claims
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	config := configs.Get()
