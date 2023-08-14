@@ -24,7 +24,6 @@ func ProvideUserHandler(service users.UserService, auth *middleware.Authenticati
 	}
 }
 
-// Router sets up the router for this domain.
 func (h *UserHandler) Router(r chi.Router) {
 	r.Route("/", func(r chi.Router) {
 		r.Use(h.Authentication.VerifyJWT)
@@ -39,7 +38,6 @@ func (h *UserHandler) Router(r chi.Router) {
 }
 
 func (h *UserHandler) ReadUser(w http.ResponseWriter, r *http.Request) {
-	// Parse query parameters
 	q := r.URL.Query()
 	name := q.Get("name")
 	city := q.Get("city")
@@ -49,7 +47,6 @@ func (h *UserHandler) ReadUser(w http.ResponseWriter, r *http.Request) {
 	page, _ := strconv.Atoi(q.Get("page"))
 	size, _ := strconv.Atoi(q.Get("size"))
 
-	// Set default values for page and size if they are not provided or invalid
 	if page < 1 {
 		page = 1
 	}
@@ -57,7 +54,6 @@ func (h *UserHandler) ReadUser(w http.ResponseWriter, r *http.Request) {
 		size = 5
 	}
 
-	// Call the service to fetch the user with the specified filters and sorting
 	response, err := h.UserService.ReadUser(users.UserFilter{
 		Name:     name,
 		City:     city,
@@ -78,10 +74,8 @@ func (h *UserHandler) ReadUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserHandler) DeleteUserByID(w http.ResponseWriter, r *http.Request) {
-	// Get the user ID from the URL parameters
 	uuid := chi.URLParam(r, "uuid")
 
-	// Delete the user by ID
 	err := h.UserService.DeleteUserByID(uuid)
 	if err != nil {
 		if strings.Contains(err.Error(), "admin role") {
@@ -113,7 +107,6 @@ func (h *UserHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
-	// Decode the request body into the update struct
 	var update users.UpdateProfile
 	if err := json.NewDecoder(r.Body).Decode(&update); err != nil {
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
@@ -123,7 +116,6 @@ func (h *UserHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 	update.UpdatedBy = r.Context().Value("username").(string)
 	uuid := r.Context().Value("user_id").(string)
 
-	// Validate and format the date of birth
 	if update.DoB != nil && *update.DoB != "" {
 		_, err := time.Parse("2006-01-02", *update.DoB)
 		if err != nil {
@@ -135,7 +127,6 @@ func (h *UserHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Perform the update operation
 	_, err := h.UserService.UpdateProfile(uuid, &update)
 	if err != nil {
 		http.Error(w, "Failed to update profile", http.StatusInternalServerError)
