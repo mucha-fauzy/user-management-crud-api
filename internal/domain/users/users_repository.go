@@ -61,7 +61,6 @@ func (r *UserRepositoryMySQL) GetData(filter UserFilter, page, size int) ([]User
 				ON u.dept_id = d.id
 	`
 
-	// Add filters
 	args := []interface{}{}
 	if filter.Name != "" {
 		if len(args) > 0 {
@@ -113,7 +112,6 @@ func (r *UserRepositoryMySQL) GetData(filter UserFilter, page, size int) ([]User
 		args = append(args, "%"+filter.Status+"%")
 	}
 
-	// Add pagination
 	if page < 1 {
 		page = 1
 	}
@@ -155,7 +153,6 @@ func (r *UserRepositoryMySQL) CountTotalData(filter UserFilter) (int, error) {
 				ON u.dept_id = d.id
 	`
 
-	// Add filters
 	argsTotalData := []interface{}{}
 	if filter.Name != "" {
 		if len(argsTotalData) > 0 {
@@ -285,7 +282,6 @@ func (r *UserRepositoryMySQL) GetProfile(uuid string) (*ProfileView, error) {
 }
 
 func (r *UserRepositoryMySQL) UpdateProfile(uuid string, profile *UpdateProfile) (*UpdateProfile, error) {
-	// Build the SET clause for the update query
 	setClauses := []string{
 		"p.name = COALESCE(?, p.name)",
 		"p.gender = COALESCE(?, p.gender)",
@@ -299,7 +295,6 @@ func (r *UserRepositoryMySQL) UpdateProfile(uuid string, profile *UpdateProfile)
 		"u.updated_at = ?, u.updated_by = ?",
 	}
 
-	// Construct the SQL query
 	query := fmt.Sprintf(`
 		UPDATE ums_profiles AS p
 		INNER JOIN ums_users AS u ON p.id = u.profile_id
@@ -324,7 +319,6 @@ func (r *UserRepositoryMySQL) UpdateProfile(uuid string, profile *UpdateProfile)
 		uuid,
 	}
 
-	// Execute the update query
 	_, err := r.DB.Write.Exec(query, values...)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to update profile")
@@ -334,7 +328,6 @@ func (r *UserRepositoryMySQL) UpdateProfile(uuid string, profile *UpdateProfile)
 	return profile, nil
 }
 
-// lowercaseOrNil converts a string pointer to lowercase if it's not nil.
 func lowercaseOrNil(s *string) interface{} {
 	if s != nil {
 		return strings.ToLower(*s)
