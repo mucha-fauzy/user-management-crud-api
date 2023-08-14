@@ -34,7 +34,6 @@ func (h *AuthHandler) Router(r chi.Router) {
 }
 
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
-	// Parse the username and password from the request body
 	var req struct {
 		Username string `json:"username"`
 		Password string `json:"password"`
@@ -44,13 +43,11 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Validate required fields
 	if req.Username == "" || req.Password == "" {
 		http.Error(w, "username and password fields are required", http.StatusBadRequest)
 		return
 	}
 
-	// Authenticate user and generate JWT token
 	token, err := h.AuthService.Login(req.Username, req.Password)
 	if err != nil {
 		if err == auth.ErrNotFound {
@@ -63,7 +60,6 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Respond with the JWT token
 	w.Header().Set("Content-Type", "application/json")
 	response := map[string]string{
 		"token": token,
@@ -72,20 +68,17 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
-	// Define the required struct for the request body
 	var req struct {
 		Username string `json:"username"`
 		Password string `json:"password"`
 		Role     string `json:"role"`
 	}
 
-	// Decode the request body into the req struct
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
 
-	// Validate required fields
 	if req.Username == "" || req.Password == "" || req.Role == "" {
 		http.Error(w, "username, password, and role fields are required", http.StatusBadRequest)
 		return
