@@ -106,7 +106,7 @@ Send a DELETE request to `/v1/users/{user_id}` to delete a user. Requires a vali
 
 ## Postman Collection and Testing
 
-To facilitate testing and interacting with the Users Management API, we provide a Postman collection named `Users Management API.postman_collection.json`. This collection includes a set of pre-configured requests that you can use to test various API endpoints easily.
+To facilitate testing and interacting with the Users Management API, we provide a Postman collection named `Users-Management-API.postman_collection.json`. This collection includes a set of pre-configured requests that you can use to test various API endpoints easily.
 
 ### Import Postman Collection
 
