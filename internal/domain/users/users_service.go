@@ -30,10 +30,8 @@ func (s *UserServiceImpl) ReadUser(filter UserFilter, page, size int) (UserList,
 		return UserList{}, err
 	}
 
-	// Calculate total pages
 	totalPages := int(math.Ceil(float64(totalData) / float64(size)))
 
-	// Populate the response
 	var nextPage *int
 	if page < totalPages {
 		nextPageValue := page + 1
