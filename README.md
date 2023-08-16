@@ -116,8 +116,7 @@ To facilitate testing and interacting with the Users Management API, we provide 
 
 ### Running Test Scripts
 
-For each request in the Postman collection, we've included test scripts to validate the response and ensure that the API endpoints are functioning correctly. The test scripts cover scenarios such as successful responses, error handling, and pagination.
-
+For each request in the Postman collection, we've included test scripts to validate the response and ensure that the API endpoints are functioning correctly.
 To run the test scripts:
 
 1. Open the imported Postman collection.
