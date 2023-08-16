@@ -110,7 +110,7 @@ To facilitate testing and interacting with the Users Management API, we provide 
 
 ### Import Postman Collection
 
-1. Download the `Users Management API.postman_collection.json` file from this repository.
+1. Download the `Users-Management-API.postman_collection.json` file from this repository.
 2. Open Postman and click on the "Import" button in the top-left corner.
 3. Select the downloaded JSON file and import it into Postman.
 
