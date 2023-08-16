@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/evermos/boilerplate-go/internal/domain/users"
-	"github.com/evermos/boilerplate-go/shared/context"
+	context_helpers "github.com/evermos/boilerplate-go/shared/context"
 	"github.com/evermos/boilerplate-go/transport/http/middleware"
 	"github.com/go-chi/chi"
 )
@@ -96,7 +96,7 @@ func (h *UserHandler) DeleteUserByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
-	uuid, err := context.GetUserIDFromContext(r)
+	uuid, err := context_helpers.GetUserIDFromContext(r)
 	if err != nil {
 		http.Error(w, "Failed to get user ID from context", http.StatusInternalServerError)
 		return
@@ -118,14 +118,14 @@ func (h *UserHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	updatedBy, err := context.GetUsernameFromContext(r)
+	updatedBy, err := context_helpers.GetUsernameFromContext(r)
 	if err != nil {
 		http.Error(w, "Failed to get username from context", http.StatusInternalServerError)
 		return
 	}
 	update.UpdatedBy = updatedBy
 
-	uuid, err := context.GetUserIDFromContext(r)
+	uuid, err := context_helpers.GetUserIDFromContext(r)
 	if err != nil {
 		http.Error(w, "Failed to get user ID from context", http.StatusInternalServerError)
 		return
