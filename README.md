@@ -80,7 +80,7 @@ Send a GET request to `/v1/profiles` to retrieve the profile of the authenticate
 
 ### Admin Get Users 
 
-Send a GET request to `/v1/users` to retrieve the users data. Requires a valid JWT with admin role for authentication. You can use the following query parameters for filtering, sorting, and pagination:
+Send a GET request to `/v1/users` to retrieve the users data. Requires a valid JWT with admin role for authentication. You can use the following query parameters for filtering and pagination:
 
 * name: Filter users by name (optional).
 * city: Filter users by city (optional).
