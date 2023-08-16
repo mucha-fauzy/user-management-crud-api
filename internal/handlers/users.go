@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/evermos/boilerplate-go/internal/domain/users"
+	"github.com/evermos/boilerplate-go/shared/context"
 	"github.com/evermos/boilerplate-go/transport/http/middleware"
 	"github.com/go-chi/chi"
 )
@@ -95,7 +96,11 @@ func (h *UserHandler) DeleteUserByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
-	uuid := r.Context().Value("user_id").(string)
+	uuid, err := context.GetUserIDFromContext(r)
+	if err != nil {
+		http.Error(w, "Failed to get user ID from context", http.StatusInternalServerError)
+		return
+	}
 	profile, err := h.UserService.GetProfile(uuid)
 	if err != nil {
 		http.Error(w, "Failed to fetch profile", http.StatusInternalServerError)
@@ -113,8 +118,18 @@ func (h *UserHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	update.UpdatedBy = r.Context().Value("username").(string)
-	uuid := r.Context().Value("user_id").(string)
+	updatedBy, err := context.GetUsernameFromContext(r)
+	if err != nil {
+		http.Error(w, "Failed to get username from context", http.StatusInternalServerError)
+		return
+	}
+	update.UpdatedBy = updatedBy
+
+	uuid, err := context.GetUserIDFromContext(r)
+	if err != nil {
+		http.Error(w, "Failed to get user ID from context", http.StatusInternalServerError)
+		return
+	}
 
 	if update.DoB != nil && *update.DoB != "" {
 		_, err := time.Parse("2006-01-02", *update.DoB)
@@ -127,7 +142,7 @@ func (h *UserHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err := h.UserService.UpdateProfile(uuid, &update)
+	_, err = h.UserService.UpdateProfile(uuid, &update)
 	if err != nil {
 		http.Error(w, "Failed to update profile", http.StatusInternalServerError)
 		return
