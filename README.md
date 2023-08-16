@@ -16,7 +16,7 @@ This is an API for managing user profiles and authentication, built using Golang
 - Update user profiles with validation and formatting.
 - Retrieve user profiles with role-based access control.
 - Delete a user by ID with role-based access control.
-- Retrieve users with filtering, sorting, and pagination.
+- Retrieve users with filtering and pagination.
 
 ## Installation
 
