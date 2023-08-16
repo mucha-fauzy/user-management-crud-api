@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/evermos/boilerplate-go/configs"
-	"github.com/evermos/boilerplate-go/infras" // Your provided package
+	"github.com/evermos/boilerplate-go/infras"
 	"github.com/rs/zerolog/log"
 )
 
@@ -95,10 +95,8 @@ func main() {
 		CREATE INDEX idx_status ON ums_status (status);
 	`
 
-	// Split the query into separate statements
 	statements := strings.Split(query, ";")
 
-	// Remove empty statements
 	var validStatements []string
 	for _, stmt := range statements {
 		if strings.TrimSpace(stmt) != "" {
@@ -106,7 +104,6 @@ func main() {
 		}
 	}
 
-	// Execute each statement
 	for _, stmt := range validStatements {
 		_, err := mysqlConn.Write.Exec(stmt)
 		if err != nil {
